@@ -57,7 +57,10 @@ static constexpr size_t PERM[LANE_CNT]{ 0,  6,  12, 18, 24, 3,  9, 10, 16,
 //
 // Taken from
 // https://github.com/itzmeanjan/elephant/blob/2a21c7e/include/keccak.hpp#L24-L59
-consteval static bool
+#ifndef ANDROID
+consteval
+#endif
+static bool
 rc(const size_t t)
 {
   // step 1 of algorithm 5
@@ -75,10 +78,10 @@ rc(const size_t t)
   for (size_t i = 1; i <= t % 255; i++) {
     const uint16_t b0 = r & 1;
 
-    r = (r & 0b011111111) ^ ((((r >> 8) & 1) ^ b0) << 8);
-    r = (r & 0b111101111) ^ ((((r >> 4) & 1) ^ b0) << 4);
-    r = (r & 0b111110111) ^ ((((r >> 3) & 1) ^ b0) << 3);
-    r = (r & 0b111111011) ^ ((((r >> 2) & 1) ^ b0) << 2);
+    r = static_cast<uint16_t>((r & 0b011111111) ^ ((((r >> 8) & 1) ^ b0) << 8));
+    r = static_cast<uint16_t>((r & 0b111101111) ^ ((((r >> 4) & 1) ^ b0) << 4));
+    r = static_cast<uint16_t>((r & 0b111110111) ^ ((((r >> 3) & 1) ^ b0) << 3));
+    r = static_cast<uint16_t>((r & 0b111111011) ^ ((((r >> 2) & 1) ^ b0) << 2));
 
     // step 3.f of algorithm 5
     //
@@ -95,7 +98,10 @@ rc(const size_t t)
 //
 // Taken from
 // https://github.com/itzmeanjan/elephant/blob/2a21c7e/include/keccak.hpp#L61-L74
-consteval static uint64_t
+#ifndef ANDROID
+consteval
+#endif
+static uint64_t
 compute_rc(const size_t r_idx)
 {
   uint64_t tmp = 0;
@@ -109,7 +115,10 @@ compute_rc(const size_t r_idx)
 }
 
 // Compile-time evaluate Keccak-p[1600, 24] round constants.
-consteval std::array<uint64_t, LANE_CNT>
+#ifndef ANDROID
+consteval
+#endif
+std::array<uint64_t, LANE_CNT>
 compute_rcs()
 {
   std::array<uint64_t, LANE_CNT> res;
@@ -651,7 +660,7 @@ rho(uint64_t* const state)
 #pragma GCC ivdep
 #endif
   for (size_t i = 0; i < 25; i++) {
-    state[i] = std::rotl(state[i], ROT[i]);
+    state[i] = static_cast<uint64_t>(std::rotl(state[i], static_cast<unsigned int>(ROT[i])));
   }
 }
 
